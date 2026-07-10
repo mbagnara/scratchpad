@@ -1,0 +1,32 @@
+import type { Note } from './types';
+
+export type SidebarFilter =
+  | { type: 'recent' }
+  | { type: 'favorites' }
+  | { type: 'pinned' }
+  | { type: 'archive' }
+  | { type: 'tag'; tag: string };
+
+export function filterNotesForSidebar(notes: Note[], filter: SidebarFilter): Note[] {
+  switch (filter.type) {
+    case 'recent':
+      return notes.filter((n) => !n.isArchived);
+    case 'favorites':
+      return notes.filter((n) => !n.isArchived && n.isFavorite);
+    case 'pinned':
+      return notes.filter((n) => !n.isArchived && n.isPinned);
+    case 'archive':
+      return notes.filter((n) => n.isArchived);
+    case 'tag':
+      return notes.filter((n) => !n.isArchived && n.tags.includes(filter.tag));
+  }
+}
+
+export function getAvailableTags(notes: Note[]): string[] {
+  const tags = new Set<string>();
+  for (const note of notes) {
+    if (note.isArchived) continue;
+    for (const tag of note.tags) tags.add(tag);
+  }
+  return Array.from(tags).sort((a, b) => a.localeCompare(b));
+}

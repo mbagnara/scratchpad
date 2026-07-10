@@ -1,0 +1,57 @@
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  width: 100%;
+  position: relative;
+}
+
+.callout__icon {
+  font-size: 16px;
+  line-height: 1.6;
+  flex-shrink: 0;
+}
+
+.callout__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.callout__select {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 11px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  cursor: pointer;
+}
+
+.callout:hover .callout__select {
+  opacity: 1;
+}
+
+.callout--idea {
+  background: rgba(250, 204, 21, 0.15);
+}
+
+.callout--important {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.callout--warning {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.callout--reference {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.callout--success {
+  background: rgba(34, 197, 94, 0.12);
+}

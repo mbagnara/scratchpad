@@ -1,0 +1,31 @@
+.block-editor {
+  position: relative;
+}
+
+.block-editor__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.code-copy-button {
+  position: absolute;
+  pointer-events: auto;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.code-copy-button--visible {
+  opacity: 1;
+}
+
+.code-copy-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
