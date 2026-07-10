@@ -5,8 +5,11 @@ export const ATTACHMENT_SCHEME = 'notebook-attachment:';
 
 export class AttachmentsService {
   private objectUrlCache = new Map<string, string>();
+  private repo: AttachmentsRepository;
 
-  constructor(private repo: AttachmentsRepository) {}
+  constructor(repo: AttachmentsRepository) {
+    this.repo = repo;
+  }
 
   async save(file: File, noteId: string): Promise<string> {
     const id = uuid();

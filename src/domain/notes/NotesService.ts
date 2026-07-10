@@ -3,7 +3,11 @@ import type { NotesRepository } from './NotesRepository';
 import type { Note, NoteFilter, NoteInput } from './types';
 
 export class NotesService {
-  constructor(private repo: NotesRepository) {}
+  private repo: NotesRepository;
+
+  constructor(repo: NotesRepository) {
+    this.repo = repo;
+  }
 
   async create(input: NoteInput = {}): Promise<Note> {
     const now = Date.now();
