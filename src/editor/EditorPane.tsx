@@ -107,6 +107,11 @@ export function EditorPane() {
 
   return (
     <div className="editor-pane">
+      <div className="editor-pane__eyebrow">
+        <span>Notes</span>
+        <span aria-hidden="true">/</span>
+        <span>{note.isArchived ? 'Archive' : 'Workspace'}</span>
+      </div>
       <div className="editor-pane__header">
         <input
           key={note.id}
@@ -122,14 +127,14 @@ export function EditorPane() {
             aria-label={note.isFavorite ? 'Unfavorite' : 'Favorite'}
             onClick={() => toggleFavorite(note.id)}
           >
-            ⭐
+            <span aria-hidden="true">☆</span>
           </button>
           <button
             className={`editor-pane__icon-button ${note.isPinned ? 'editor-pane__icon-button--active' : ''}`}
             aria-label={note.isPinned ? 'Unpin' : 'Pin'}
             onClick={() => togglePin(note.id)}
           >
-            📌
+            <span aria-hidden="true">⌁</span>
           </button>
           <span className={`editor-pane__status ${saveStatus === 'error' ? 'editor-pane__status--error' : ''}`}>
             {STATUS_LABEL[saveStatus]}

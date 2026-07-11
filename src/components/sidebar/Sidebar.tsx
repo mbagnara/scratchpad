@@ -35,6 +35,13 @@ export function Sidebar() {
     <>
       {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
       <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
+        <div className="sidebar__brand">
+          <span className="sidebar__brand-mark" aria-hidden="true">N</span>
+          <div>
+            <strong>Noted</strong>
+            <span>Personal workspace</span>
+          </div>
+        </div>
         <button
           className="sidebar__new-note"
           onClick={() => {
@@ -42,7 +49,9 @@ export function Sidebar() {
             setSidebarOpen(false);
           }}
         >
-          + New note
+          <span aria-hidden="true">＋</span>
+          <span>New note</span>
+          <span className="sidebar__new-note-key">⌘N</span>
         </button>
         <button
           className="sidebar__search-trigger"
@@ -51,10 +60,11 @@ export function Sidebar() {
             setSidebarOpen(false);
           }}
         >
-          <span>🔍 Search</span>
+          <span className="sidebar__search-label"><span aria-hidden="true">⌕</span> Search notes</span>
           <span className="sidebar__search-shortcut">⌘K</span>
         </button>
 
+        <div className="sidebar__section-label">Workspace</div>
         <nav className="sidebar__nav">
           <NavItem
             label="Recent"
@@ -121,6 +131,10 @@ export function Sidebar() {
         </ul>
 
         <div className="sidebar__footer">
+          <div className="sidebar__storage">
+            <span className="sidebar__storage-dot" />
+            <span>Stored locally</span>
+          </div>
           <button
             className="sidebar__theme-toggle"
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}

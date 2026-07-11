@@ -33,7 +33,7 @@ export function TagInput({ tags, onAddTag, onRemoveTag }: Props) {
       <input
         className="tag-input__field"
         value={draft}
-        placeholder={tags.length === 0 ? 'Add tags…' : ''}
+        placeholder={tags.length === 0 ? '+ Add a tag' : '+ Add'}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ',') {
