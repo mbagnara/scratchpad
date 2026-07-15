@@ -29,7 +29,7 @@ function NoteListItemImpl({
     <li className={`note-list-item ${active ? 'note-list-item--active' : ''}`}>
       <button className="note-list-item__button" onClick={() => onSelect(note.id)}>
         <span className="note-list-item__title">
-          {note.isPinned && <span className="note-list-item__badge">📌</span>}
+          {note.isPinned && <span className="note-list-item__badge" title="In Focus">◎</span>}
           {note.isFavorite && <span className="note-list-item__badge">⭐</span>}
           {note.title || 'Untitled'}
         </span>

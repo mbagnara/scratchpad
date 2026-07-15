@@ -3,7 +3,7 @@ import type { Note } from './types';
 export type SidebarFilter =
   | { type: 'recent' }
   | { type: 'favorites' }
-  | { type: 'pinned' }
+  | { type: 'focus' }
   | { type: 'archive' }
   | { type: 'tag'; tag: string };
 
@@ -13,7 +13,7 @@ export function filterNotesForSidebar(notes: Note[], filter: SidebarFilter): Not
       return notes.filter((n) => !n.isArchived);
     case 'favorites':
       return notes.filter((n) => !n.isArchived && n.isFavorite);
-    case 'pinned':
+    case 'focus':
       return notes.filter((n) => !n.isArchived && n.isPinned);
     case 'archive':
       return notes.filter((n) => n.isArchived);

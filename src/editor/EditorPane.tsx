@@ -131,10 +131,11 @@ export function EditorPane() {
           </button>
           <button
             className={`editor-pane__icon-button ${note.isPinned ? 'editor-pane__icon-button--active' : ''}`}
-            aria-label={note.isPinned ? 'Unpin' : 'Pin'}
+            aria-label={note.isPinned ? 'Remove from Focus' : 'Add to Focus'}
+            title={note.isPinned ? 'Remove from Focus' : 'Add to Focus'}
             onClick={() => togglePin(note.id)}
           >
-            <span aria-hidden="true">⌁</span>
+            <span aria-hidden="true">◎</span>
           </button>
           <span className={`editor-pane__status ${saveStatus === 'error' ? 'editor-pane__status--error' : ''}`}>
             {STATUS_LABEL[saveStatus]}

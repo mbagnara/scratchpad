@@ -8,6 +8,7 @@ export interface Note {
   content: Block[];
   tags: string[];
   isFavorite: boolean;
+  /** Legacy storage name; represents membership in the user's Focus working set. */
   isPinned: boolean;
   isArchived: boolean;
   createdAt: number;

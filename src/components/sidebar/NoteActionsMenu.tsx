@@ -68,7 +68,7 @@ export function NoteActionsMenu({
             {note.isFavorite ? 'Unfavorite' : 'Favorite'}
           </button>
           <button role="menuitem" onClick={() => runAndClose(() => onTogglePin(note.id))}>
-            {note.isPinned ? 'Unpin' : 'Pin'}
+            {note.isPinned ? 'Remove from Focus' : 'Add to Focus'}
           </button>
           <button role="menuitem" onClick={() => runAndClose(() => onDuplicate(note.id))}>
             Duplicate

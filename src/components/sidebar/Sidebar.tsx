@@ -27,6 +27,8 @@ export function Sidebar() {
 
   const visibleNotes = filterNotesForSidebar(notes, activeFilter);
   const tags = getAvailableTags(notes);
+  const focusCount = notes.filter((note) => !note.isArchived && note.isPinned).length;
+  const favoritesCount = notes.filter((note) => !note.isArchived && note.isFavorite).length;
 
   const selectAndClose = (id: string) => {
     selectNote(id);
@@ -69,6 +71,13 @@ export function Sidebar() {
         <div className="sidebar__section-label">Workspace</div>
         <nav className="sidebar__nav">
           <NavItem
+            label="Focus"
+            icon="◎"
+            count={focusCount}
+            active={activeFilter.type === 'focus'}
+            onClick={() => setFilter({ type: 'focus' })}
+          />
+          <NavItem
             label="Recent"
             icon="🕐"
             active={activeFilter.type === 'recent'}
@@ -77,14 +86,9 @@ export function Sidebar() {
           <NavItem
             label="Favorites"
             icon="⭐"
+            count={favoritesCount}
             active={activeFilter.type === 'favorites'}
             onClick={() => setFilter({ type: 'favorites' })}
-          />
-          <NavItem
-            label="Pinned"
-            icon="📌"
-            active={activeFilter.type === 'pinned'}
-            onClick={() => setFilter({ type: 'pinned' })}
           />
           <NavItem
             label="Archive"
@@ -155,7 +159,13 @@ export function Sidebar() {
               onRestore={restoreNote}
             />
           ))}
-          {visibleNotes.length === 0 && <li className="note-list__empty">No notes here</li>}
+          {visibleNotes.length === 0 && (
+            <li className="note-list__empty">
+              {activeFilter.type === 'focus'
+                ? 'Your focus is clear. Add a note when you start working on it.'
+                : 'No notes here'}
+            </li>
+          )}
         </ul>
 
         <div className="sidebar__footer">
