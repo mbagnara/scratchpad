@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { getAvailableTags, filterNotesForSidebar } from '../../domain/notes';
 import { useNotesStore } from '../../state/notesStore';
 import { useUIStore } from '../../state/uiStore';
@@ -5,6 +6,7 @@ import { NavItem } from './NavItem';
 import { NoteListItem } from './NoteListItem';
 
 export function Sidebar() {
+  const [tagsExpanded, setTagsExpanded] = useState(false);
   const notes = useNotesStore((s) => s.notes);
   const activeNoteId = useNotesStore((s) => s.activeNoteId);
   const activeFilter = useNotesStore((s) => s.activeFilter);
@@ -93,25 +95,51 @@ export function Sidebar() {
         </nav>
 
         {tags.length > 0 && (
-          <>
-            <div className="sidebar__section-label">Tags</div>
-            <nav className="sidebar__nav">
-              {tags.map((tag) => (
+          <section className={`sidebar__tags ${tagsExpanded ? 'sidebar__tags--expanded' : ''}`}>
+            <button
+              className="sidebar__tags-header"
+              type="button"
+              aria-expanded={tagsExpanded}
+              aria-controls="sidebar-tags-list"
+              onClick={() => setTagsExpanded((expanded) => !expanded)}
+            >
+              <span>Tags</span>
+              <span className="sidebar__tags-meta">
+                <span className="sidebar__tags-count">{tags.length}</span>
+                <span className="sidebar__tags-chevron" aria-hidden="true">›</span>
+              </span>
+            </button>
+
+            {tagsExpanded ? (
+              <nav className="sidebar__tags-list" id="sidebar-tags-list" aria-label="Tags">
+                {tags.map((tag) => (
+                  <NavItem
+                    key={tag}
+                    label={tag}
+                    icon="🏷"
+                    active={activeFilter.type === 'tag' && activeFilter.tag === tag}
+                    onClick={() => setFilter({ type: 'tag', tag })}
+                  />
+                ))}
+              </nav>
+            ) : activeFilter.type === 'tag' ? (
+              <nav className="sidebar__tags-active" aria-label="Active tag">
                 <NavItem
-                  key={tag}
-                  label={tag}
+                  label={activeFilter.tag}
                   icon="🏷"
-                  active={activeFilter.type === 'tag' && activeFilter.tag === tag}
-                  onClick={() => setFilter({ type: 'tag', tag })}
+                  active
+                  onClick={() => setTagsExpanded(true)}
                 />
-              ))}
-            </nav>
-          </>
+              </nav>
+            ) : null}
+          </section>
         )}
 
-        {activeFilter.type === 'tag' && (
-          <div className="sidebar__section-label">#{activeFilter.tag}</div>
-        )}
+        <div className="sidebar__notes-heading">
+          <span>Notes</span>
+          {activeFilter.type === 'tag' && <span>#{activeFilter.tag}</span>}
+          <span className="sidebar__notes-count">{visibleNotes.length}</span>
+        </div>
         <ul className="note-list">
           {visibleNotes.map((note) => (
             <NoteListItem
