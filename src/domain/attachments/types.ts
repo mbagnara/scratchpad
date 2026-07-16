@@ -1,3 +1,5 @@
+export type AttachmentPlacement = 'inline' | 'note';
+
 export interface Attachment {
   id: string;
   noteId: string;
@@ -6,4 +8,6 @@ export interface Attachment {
   size: number;
   blob: Blob;
   createdAt: number;
+  /** Missing on legacy records, which are treated as inline attachments. */
+  placement?: AttachmentPlacement;
 }

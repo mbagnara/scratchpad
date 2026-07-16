@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import type { AttachmentsRepository } from './AttachmentsRepository';
+import type { Attachment, AttachmentPlacement } from './types';
 
 export const ATTACHMENT_SCHEME = 'notebook-attachment:';
 export const MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024;
@@ -25,7 +26,7 @@ export class AttachmentsService {
     this.repo = repo;
   }
 
-  async save(file: File, noteId: string): Promise<string> {
+  async save(file: File, noteId: string, placement: AttachmentPlacement = 'inline'): Promise<string> {
     await this.validate(file);
     const id = uuid();
     try {
@@ -37,6 +38,7 @@ export class AttachmentsService {
         size: file.size,
         blob: file,
         createdAt: Date.now(),
+        placement,
       });
     } catch (error) {
       if (error instanceof DOMException && error.name === 'QuotaExceededError') {
@@ -45,6 +47,39 @@ export class AttachmentsService {
       throw new AttachmentUploadError('The file could not be saved locally.', 'storage');
     }
     return `${ATTACHMENT_SCHEME}${id}`;
+  }
+
+  async listNoteAttachments(noteId: string): Promise<Attachment[]> {
+    const attachments = await this.repo.listByNote(noteId);
+    return attachments.filter((attachment) => attachment.placement === 'note');
+  }
+
+  async rename(id: string, filename: string): Promise<void> {
+    const normalized = filename.trim().slice(0, 255);
+    if (!normalized) throw new Error('A filename is required.');
+    await this.repo.update(id, { filename: normalized });
+  }
+
+  async delete(id: string): Promise<void> {
+    this.releaseObjectUrl(id);
+    await this.repo.delete(id);
+  }
+
+  async deleteNoteAttachments(noteId: string): Promise<void> {
+    const attachments = await this.listNoteAttachments(noteId);
+    await Promise.all(attachments.map((attachment) => this.delete(attachment.id)));
+  }
+
+  async copyNoteAttachments(sourceNoteId: string, targetNoteId: string): Promise<void> {
+    const attachments = await this.listNoteAttachments(sourceNoteId);
+    await Promise.all(attachments.map((attachment) => this.repo.add({
+      ...attachment,
+      id: uuid(),
+      noteId: targetNoteId,
+      blob: attachment.blob.slice(0, attachment.blob.size, attachment.mimeType),
+      createdAt: Date.now(),
+      placement: 'note',
+    })));
   }
 
   private async validate(file: File): Promise<void> {
@@ -89,5 +124,12 @@ export class AttachmentsService {
   releaseObjectUrls(): void {
     this.objectUrlCache.forEach((url) => URL.revokeObjectURL(url));
     this.objectUrlCache.clear();
+  }
+
+  releaseObjectUrl(id: string): void {
+    const url = this.objectUrlCache.get(id);
+    if (!url) return;
+    URL.revokeObjectURL(url);
+    this.objectUrlCache.delete(id);
   }
 }

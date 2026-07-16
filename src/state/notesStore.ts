@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { notesService } from '../domain/notes';
 import type { Note, SidebarFilter } from '../domain/notes';
 import { searchService } from '../domain/search/SearchService';
+import { attachmentsService } from '../domain/attachments';
 
 interface NotesState {
   notes: Note[];
@@ -61,11 +62,13 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       activeNoteId: get().activeNoteId === id ? null : get().activeNoteId,
     });
     await notesService.delete(id);
+    await attachmentsService.deleteNoteAttachments(id);
     searchService.remove(id);
   },
 
   duplicateNote: async (id) => {
     const copy = await notesService.duplicate(id);
+    await attachmentsService.copyNoteAttachments(id, copy.id);
     set({ notes: [copy, ...get().notes] });
     searchService.index(copy);
   },

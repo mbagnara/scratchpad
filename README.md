@@ -4,7 +4,8 @@ A fast, distraction-free note-taking app with a block-based editor, instant sear
 
 ## Features
 
-- Block-based editor: paragraphs, headings, bullet/numbered lists, checklists, quotes, dividers, toggles, callouts, code blocks with syntax highlighting, images, and file attachments
+- Block-based editor: paragraphs, headings, bullet/numbered lists, checklists, quotes, dividers, toggles, callouts, code blocks with syntax highlighting, images, and inline file attachments
+- Note-level attachments with a collapsible file panel, preview, download, rename, and removal
 - Slash command menu (`/`) and markdown shortcuts (`#`, `-`, `>`, ` ``` `, ...)
 - Instant full-text search across titles, tags, and content (`Cmd/Ctrl+K`)
 - Tags, favorites, Focus working set, and archive

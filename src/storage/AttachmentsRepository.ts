@@ -10,4 +10,16 @@ export class DexieAttachmentsRepository implements AttachmentsRepository {
   async get(id: string): Promise<Attachment | undefined> {
     return db.attachments.get(id);
   }
+
+  async listByNote(noteId: string): Promise<Attachment[]> {
+    return db.attachments.where('noteId').equals(noteId).reverse().sortBy('createdAt');
+  }
+
+  async update(id: string, patch: Partial<Pick<Attachment, 'filename'>>): Promise<void> {
+    await db.attachments.update(id, patch);
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.attachments.delete(id);
+  }
 }
