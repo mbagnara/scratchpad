@@ -5,7 +5,7 @@ import { useEditorStore } from '../state/editorStore';
 import { useAutosave } from '../hooks/useAutosave';
 import { TagInput } from '../components/ui/TagInput';
 import { TableOfContents } from '../components/toc/TableOfContents';
-import { BlockEditor } from './BlockEditor';
+import { BlockEditor, type BlockEditorHandle } from './BlockEditor';
 import { deriveTitleFromContent } from './deriveTitle';
 import { getHeadings } from './getHeadings';
 
@@ -34,6 +34,7 @@ export function EditorPane() {
 
   const pendingPatch = useRef<PendingPatch | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const blockEditorRef = useRef<BlockEditorHandle>(null);
   // pendingPatch is a ref (so handlers always read/write the latest value,
   // never a stale render snapshot); bump this to force a re-render so the
   // UI (tag chips, title) reflects it immediately.
@@ -137,6 +138,16 @@ export function EditorPane() {
           >
             <span aria-hidden="true">◎</span>
           </button>
+          <button
+            className="editor-pane__icon-button"
+            aria-label="Attach files"
+            title="Attach files (25 MB max)"
+            onClick={() => blockEditorRef.current?.openFilePicker()}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path d="M8.5 12.5 14.8 6.2a3 3 0 0 1 4.2 4.2l-8 8a5 5 0 0 1-7.1-7.1l8.4-8.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
           <span className={`editor-pane__status ${saveStatus === 'error' ? 'editor-pane__status--error' : ''}`}>
             {STATUS_LABEL[saveStatus]}
           </span>
@@ -144,6 +155,7 @@ export function EditorPane() {
       </div>
       <TagInput tags={current.tags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
       <BlockEditor
+        ref={blockEditorRef}
         key={note.id}
         noteId={note.id}
         initialContent={note.content}

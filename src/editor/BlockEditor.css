@@ -2,6 +2,66 @@
   position: relative;
 }
 
+.block-editor__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.attachment-status {
+  position: sticky;
+  top: 16px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: min(100%, 420px);
+  min-height: 34px;
+  padding: 7px 11px;
+  margin: 0 0 10px auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  font-size: 11px;
+  font-weight: 600;
+  animation: attachment-status-in 160ms ease-out;
+}
+
+.attachment-status--success {
+  color: #25845e;
+  border-color: color-mix(in srgb, #39b87f 28%, var(--border));
+}
+
+.attachment-status--error {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--border));
+}
+
+.attachment-status__spinner {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: attachment-spin 700ms linear infinite;
+}
+
+@keyframes attachment-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes attachment-status-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .block-editor__overlay {
   position: absolute;
   inset: 0;

@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { Block } from '@blocknote/core';
-import { filterSuggestionItems } from '@blocknote/core';
+import { filterSuggestionItems, insertOrUpdateBlockForSlashMenu } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import { SuggestionMenuController, useCreateBlockNote } from '@blocknote/react';
-import { attachmentsService } from '../domain/attachments';
+import { AttachmentUploadError, attachmentsService } from '../domain/attachments';
 import { useUIStore } from '../state/uiStore';
 import { editorSchema } from './schema';
 import { getSlashMenuItems } from './slash-menu/getSlashMenuItems';
@@ -16,9 +16,22 @@ interface Props {
   onChange: (blocks: Block[]) => void;
 }
 
+export interface BlockEditorHandle {
+  openFilePicker: () => void;
+}
+
+type AttachmentStatus =
+  | { type: 'idle' }
+  | { type: 'uploading'; message: string }
+  | { type: 'success'; message: string }
+  | { type: 'error'; message: string };
+
 const CODE_BLOCK_SELECTOR = '.bn-block-content[data-content-type="codeBlock"]';
 
-export function BlockEditor({ noteId, initialContent, onChange }: Props) {
+export const BlockEditor = forwardRef<BlockEditorHandle, Props>(function BlockEditor(
+  { noteId, initialContent, onChange },
+  ref,
+) {
   const theme = useUIStore((s) => s.theme);
   const editor = useCreateBlockNote({
     schema: editorSchema,
@@ -29,6 +42,63 @@ export function BlockEditor({ noteId, initialContent, onChange }: Props) {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const statusTimerRef = useRef<number | undefined>(undefined);
+  const [attachmentStatus, setAttachmentStatus] = useState<AttachmentStatus>({ type: 'idle' });
+
+  useImperativeHandle(ref, () => ({
+    openFilePicker: () => fileInputRef.current?.click(),
+  }), []);
+
+  const showTemporaryStatus = (status: AttachmentStatus) => {
+    window.clearTimeout(statusTimerRef.current);
+    setAttachmentStatus(status);
+    if (status.type !== 'uploading') {
+      statusTimerRef.current = window.setTimeout(
+        () => setAttachmentStatus({ type: 'idle' }),
+        status.type === 'error' ? 5000 : 2600,
+      );
+    }
+  };
+
+  const getBlockType = (file: File) => {
+    if (file.type.startsWith('image/') && file.type !== 'image/svg+xml') return 'image';
+    if (file.type.startsWith('audio/')) return 'audio';
+    if (file.type.startsWith('video/')) return 'video';
+    return 'file';
+  };
+
+  const insertAttachment = async (file: File) => {
+    showTemporaryStatus({ type: 'uploading', message: `Attaching ${file.name}…` });
+    try {
+      const result = await editor.uploadFile?.(file);
+      if (!result) throw new Error('File uploads are unavailable.');
+
+      const props = typeof result === 'string'
+        ? { url: result, name: file.name }
+        : { ...((result as { props?: Record<string, unknown> }).props ?? result), name: file.name };
+      insertOrUpdateBlockForSlashMenu(editor, {
+        type: getBlockType(file),
+        props,
+      } as never);
+      showTemporaryStatus({ type: 'success', message: `${file.name} attached` });
+    } catch (error) {
+      const message = error instanceof AttachmentUploadError
+        ? error.message
+        : `Couldn't attach ${file.name}.`;
+      showTemporaryStatus({ type: 'error', message });
+    }
+  };
+
+  const handleSelectedFiles = async (files: File[]) => {
+    for (const file of files) await insertAttachment(file);
+    editor.focus();
+  };
+
+  useEffect(() => () => {
+    window.clearTimeout(statusTimerRef.current);
+    attachmentsService.releaseObjectUrls();
+  }, []);
 
   // BlockNote's code block has no built-in copy button. ProseMirror owns the
   // editor's DOM subtree (and replaces individual block nodes on updates like
@@ -135,6 +205,28 @@ export function BlockEditor({ noteId, initialContent, onChange }: Props) {
 
   return (
     <div className="block-editor" ref={wrapperRef} onKeyDown={handleKeyDown}>
+      <input
+        ref={fileInputRef}
+        className="block-editor__file-input"
+        type="file"
+        multiple
+        tabIndex={-1}
+        onChange={(event) => {
+          const files = Array.from(event.target.files ?? []);
+          event.target.value = '';
+          if (files.length > 0) void handleSelectedFiles(files);
+        }}
+      />
+      {attachmentStatus.type !== 'idle' && (
+        <div
+          className={`attachment-status attachment-status--${attachmentStatus.type}`}
+          role={attachmentStatus.type === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          {attachmentStatus.type === 'uploading' && <span className="attachment-status__spinner" />}
+          <span>{attachmentStatus.message}</span>
+        </div>
+      )}
       <BlockNoteView
         editor={editor}
         slashMenu={false}
@@ -149,4 +241,4 @@ export function BlockEditor({ noteId, initialContent, onChange }: Props) {
       <div className="block-editor__overlay" ref={overlayRef} />
     </div>
   );
-}
+});
