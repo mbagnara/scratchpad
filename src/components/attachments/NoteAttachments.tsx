@@ -1,5 +1,4 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import {
   ATTACHMENT_SCHEME,
   AttachmentUploadError,
@@ -17,7 +16,6 @@ export interface NoteAttachmentsHandle {
 }
 
 type Status = { type: 'idle' | 'uploading' | 'success' | 'error'; message?: string };
-type Preview = { attachment: Attachment; url: string };
 
 const formatSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -34,13 +32,6 @@ const getBadge = (attachment: Attachment) => {
   return extension && extension !== attachment.filename ? extension.slice(0, 4).toUpperCase() : 'FILE';
 };
 
-const canPreview = (attachment: Attachment) =>
-  attachment.mimeType === 'application/pdf' ||
-  attachment.mimeType === 'text/plain' ||
-  attachment.mimeType.startsWith('audio/') ||
-  attachment.mimeType.startsWith('video/') ||
-  (attachment.mimeType.startsWith('image/') && attachment.mimeType !== 'image/svg+xml');
-
 export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function NoteAttachments(
   { noteId },
   ref,
@@ -52,7 +43,6 @@ export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function
   const [status, setStatus] = useState<Status>({ type: 'idle' });
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
-  const [preview, setPreview] = useState<Preview | null>(null);
 
   useImperativeHandle(ref, () => ({
     openFilePicker: () => fileInputRef.current?.click(),
@@ -68,20 +58,6 @@ export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function
       window.clearTimeout(statusTimerRef.current);
     };
   }, [noteId]);
-
-  useEffect(() => {
-    if (!preview) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setPreview(null);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [preview]);
 
   const showStatus = (next: Status) => {
     window.clearTimeout(statusTimerRef.current);
@@ -121,37 +97,6 @@ export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function
     document.body.appendChild(link);
     link.click();
     link.remove();
-  };
-
-  const open = async (attachment: Attachment) => {
-    showStatus({ type: 'uploading', message: `Opening ${attachment.filename}…` });
-    try {
-      const url = await attachmentsService.resolveUrl(`${ATTACHMENT_SCHEME}${attachment.id}`);
-      setPreview({ attachment, url });
-      setStatus({ type: 'idle' });
-    } catch {
-      showStatus({ type: 'error', message: `Couldn't open ${attachment.filename}.` });
-    }
-  };
-
-  const renderPreview = (current: Preview) => {
-    const { attachment, url } = current;
-    if (attachment.mimeType.startsWith('image/')) {
-      return <img className="attachment-preview__image" src={url} alt={attachment.filename} />;
-    }
-    if (attachment.mimeType.startsWith('audio/')) {
-      return <audio className="attachment-preview__media" src={url} controls autoPlay />;
-    }
-    if (attachment.mimeType.startsWith('video/')) {
-      return <video className="attachment-preview__video" src={url} controls autoPlay />;
-    }
-    return (
-      <iframe
-        className="attachment-preview__document"
-        src={url}
-        title={`Preview of ${attachment.filename}`}
-      />
-    );
   };
 
   const remove = async (attachment: Attachment) => {
@@ -246,7 +191,6 @@ export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function
                     <span>{attachment.mimeType || 'File'} · {formatSize(attachment.size)}</span>
                   </div>
                   <div className="note-attachment__actions">
-                    {canPreview(attachment) && <button type="button" aria-label={`Open ${attachment.filename}`} onClick={() => void open(attachment)}>Open</button>}
                     <button type="button" aria-label={`Download ${attachment.filename}`} onClick={() => void download(attachment)}>Download</button>
                     <button type="button" aria-label={`Rename ${attachment.filename}`} onClick={() => startRename(attachment)}>Rename</button>
                     <button className="note-attachment__remove" type="button" aria-label={`Remove ${attachment.filename}`} onClick={() => void remove(attachment)}>Remove</button>
@@ -259,39 +203,6 @@ export const NoteAttachments = forwardRef<NoteAttachmentsHandle, Props>(function
       )}
       </div>
 
-      {preview && createPortal(
-        <div className="attachment-preview__backdrop" onMouseDown={() => setPreview(null)}>
-          <div
-            className="attachment-preview"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Preview ${preview.attachment.filename}`}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <header className="attachment-preview__header">
-              <span className="attachment-preview__type">{getBadge(preview.attachment)}</span>
-              <div>
-                <strong>{preview.attachment.filename}</strong>
-                <span>{preview.attachment.mimeType} · {formatSize(preview.attachment.size)}</span>
-              </div>
-              <button type="button" onClick={() => void download(preview.attachment)}>Download</button>
-              <button
-                className="attachment-preview__close"
-                type="button"
-                aria-label="Close preview"
-                autoFocus
-                onClick={() => setPreview(null)}
-              >
-                ×
-              </button>
-            </header>
-            <div className="attachment-preview__body">
-              {renderPreview(preview)}
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
     </>
   );
 });
