@@ -5,5 +5,6 @@ export interface NotesRepository {
   get(id: string): Promise<Note | undefined>;
   list(filter?: NoteFilter): Promise<Note[]>;
   update(id: string, patch: Partial<Note>): Promise<void>;
+  updateMany(updates: Array<{ id: string; patch: Partial<Note> }>): Promise<void>;
   delete(id: string): Promise<void>;
 }

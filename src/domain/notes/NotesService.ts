@@ -65,7 +65,29 @@ export class NotesService {
   async togglePin(id: string): Promise<void> {
     const note = await this.repo.get(id);
     if (!note) return;
-    await this.update(id, { isPinned: !note.isPinned });
+    const focusNotes = (await this.repo.list({ pinned: true }))
+      .filter((item) => !item.isArchived)
+      .sort((a, b) => (a.focusOrder ?? Number.MAX_SAFE_INTEGER) - (b.focusOrder ?? Number.MAX_SAFE_INTEGER));
+    if (note.isPinned) {
+      await this.setFocus(id, false);
+      await this.reorderFocus(focusNotes.filter((item) => item.id !== id).map((item) => item.id));
+      return;
+    }
+    await this.setFocus(id, true, focusNotes.length + 1);
+  }
+
+  setFocus(id: string, isFocused: boolean, focusOrder?: number): Promise<void> {
+    return this.repo.update(id, {
+      isPinned: isFocused,
+      focusOrder: isFocused ? focusOrder : undefined,
+    });
+  }
+
+  reorderFocus(orderedIds: string[]): Promise<void> {
+    return this.repo.updateMany(orderedIds.map((id, index) => ({
+      id,
+      patch: { focusOrder: index + 1 },
+    })));
   }
 
   async toggleFavorite(id: string): Promise<void> {

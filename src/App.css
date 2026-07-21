@@ -954,6 +954,76 @@
   font-size: 10px;
 }
 
+.note-list--focus {
+  padding: 4px 0 8px;
+}
+
+.note-list--focus .note-list-item {
+  min-height: 58px;
+  touch-action: pan-y;
+}
+
+.note-list-item__priority {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 2px;
+  padding: 0 0 0 8px;
+}
+
+.note-list-item__priority > span {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 8px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 72%, var(--bg-elevated));
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.note-list-item__drag-handle {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: grab;
+  opacity: 0.35;
+  touch-action: none;
+}
+
+.note-list-item:hover .note-list-item__drag-handle,
+.note-list-item__drag-handle:focus-visible {
+  color: var(--accent);
+  background: var(--accent-bg);
+  opacity: 1;
+}
+
+.note-list-item__drag-handle:active {
+  cursor: grabbing;
+}
+
+.note-list-item--dragging {
+  z-index: 40;
+  border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
+  background: var(--bg-elevated);
+  box-shadow: 0 14px 32px rgba(35, 24, 67, 0.18);
+  opacity: 0.94;
+}
+
+.note-list-item--dragging::before {
+  display: none;
+}
+
 .sidebar__footer {
   display: flex;
   align-items: center;

@@ -10,6 +10,8 @@ export interface Note {
   isFavorite: boolean;
   /** Legacy storage name; represents membership in the user's Focus working set. */
   isPinned: boolean;
+  /** One-based priority inside Focus. Lower numbers are more important. */
+  focusOrder?: number;
   isArchived: boolean;
   createdAt: number;
   updatedAt: number;

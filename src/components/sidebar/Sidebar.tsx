@@ -1,4 +1,19 @@
 import { useState } from 'react';
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { getAvailableTags, filterNotesForSidebar } from '../../domain/notes';
 import { useNotesStore } from '../../state/notesStore';
 import { useUIStore } from '../../state/uiStore';
@@ -19,6 +34,7 @@ export function Sidebar() {
   const toggleFavorite = useNotesStore((s) => s.toggleFavorite);
   const archiveNote = useNotesStore((s) => s.archiveNote);
   const restoreNote = useNotesStore((s) => s.restoreNote);
+  const reorderFocus = useNotesStore((s) => s.reorderFocus);
   const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
   const theme = useUIStore((s) => s.theme);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
@@ -29,6 +45,16 @@ export function Sidebar() {
   const tags = getAvailableTags(notes);
   const focusCount = notes.filter((note) => !note.isArchived && note.isPinned).length;
   const favoritesCount = notes.filter((note) => !note.isArchived && note.isFavorite).length;
+  const focusActive = activeFilter.type === 'focus';
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!focusActive || !over || active.id === over.id) return;
+    void reorderFocus(String(active.id), String(over.id));
+  };
 
   const selectAndClose = (id: string) => {
     selectNote(id);
@@ -144,29 +170,43 @@ export function Sidebar() {
           {activeFilter.type === 'tag' && <span>#{activeFilter.tag}</span>}
           <span className="sidebar__notes-count">{visibleNotes.length}</span>
         </div>
-        <ul className="note-list">
-          {visibleNotes.map((note) => (
-            <NoteListItem
-              key={note.id}
-              note={note}
-              active={note.id === activeNoteId}
-              onSelect={selectAndClose}
-              onDelete={deleteNote}
-              onDuplicate={duplicateNote}
-              onTogglePin={togglePin}
-              onToggleFavorite={toggleFavorite}
-              onArchive={archiveNote}
-              onRestore={restoreNote}
-            />
-          ))}
-          {visibleNotes.length === 0 && (
-            <li className="note-list__empty">
-              {activeFilter.type === 'focus'
-                ? 'Your focus is clear. Add a note when you start working on it.'
-                : 'No notes here'}
-            </li>
-          )}
-        </ul>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={visibleNotes.map((note) => note.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className={`note-list ${focusActive ? 'note-list--focus' : ''}`}>
+              {visibleNotes.map((note, index) => (
+                <NoteListItem
+                  key={note.id}
+                  note={note}
+                  active={note.id === activeNoteId}
+                  onSelect={selectAndClose}
+                  onDelete={deleteNote}
+                  onDuplicate={duplicateNote}
+                  onTogglePin={togglePin}
+                  onToggleFavorite={toggleFavorite}
+                  onArchive={archiveNote}
+                  onRestore={restoreNote}
+                  focusPosition={focusActive ? index + 1 : undefined}
+                  focusTotal={focusActive ? visibleNotes.length : undefined}
+                />
+              ))}
+              {visibleNotes.length === 0 && (
+                <li className="note-list__empty">
+                  {focusActive
+                    ? 'Your focus is clear. Add a note when you start working on it.'
+                    : 'No notes here'}
+                </li>
+              )}
+            </ul>
+          </SortableContext>
+        </DndContext>
 
         <div className="sidebar__footer">
           <div className="sidebar__storage">

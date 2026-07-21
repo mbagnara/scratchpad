@@ -14,7 +14,13 @@ export function filterNotesForSidebar(notes: Note[], filter: SidebarFilter): Not
     case 'favorites':
       return notes.filter((n) => !n.isArchived && n.isFavorite);
     case 'focus':
-      return notes.filter((n) => !n.isArchived && n.isPinned);
+      return notes
+        .filter((n) => !n.isArchived && n.isPinned)
+        .sort((a, b) => {
+          const aOrder = Number.isFinite(a.focusOrder) ? a.focusOrder! : Number.MAX_SAFE_INTEGER;
+          const bOrder = Number.isFinite(b.focusOrder) ? b.focusOrder! : Number.MAX_SAFE_INTEGER;
+          return aOrder - bOrder || b.updatedAt - a.updatedAt;
+        });
     case 'archive':
       return notes.filter((n) => n.isArchived);
     case 'tag':

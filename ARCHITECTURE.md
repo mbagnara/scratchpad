@@ -46,7 +46,7 @@ Key principle: **UI never talks to storage directly.** Everything flows through 
 │ ⌘K Search│  ─────────────────────────────────         │ ≥2        │
 │          │                                            │ headings) │
 │ ★ Favs   │  [¶] Paragraph text...                     │ • Intro   │
-│ 📌 Pinned│  [H1] Heading                              │ • Setup   │
+│ ◎ Focus  │  [H1] Heading                              │ • Setup   │
 │ 🕐 Recent│  [☐] Checklist item                        │ • Notes   │
 │ 🏷 Tags  │  [❝] Quote block                           │           │
 │          │  ```code```                                │           │
@@ -77,7 +77,7 @@ App
 ├── AppShell
 │   ├── Sidebar
 │   │   ├── SearchTrigger (opens CommandPalette)
-│   │   ├── NavSection (Favorites / Pinned / Recent / Tags / Archive)
+│   │   ├── NavSection (Focus / Favorites / Recent / Tags / Archive)
 │   │   └── NoteListItem
 │   ├── EditorPane
 │   │   ├── NoteHeader (title, tags, meta, saving-status pill)
@@ -144,6 +144,7 @@ interface Note {
   tags: string[];
   isFavorite: boolean;
   isPinned: boolean;
+  focusOrder?: number;     // one-based priority inside Focus
   isArchived: boolean;
   createdAt: number;       // epoch ms
   updatedAt: number;

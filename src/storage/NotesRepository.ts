@@ -43,6 +43,15 @@ export class DexieNotesRepository implements NotesRepository {
     await table.update(id, patch);
   }
 
+  async updateMany(updates: Array<{ id: string; patch: Partial<Note> }>): Promise<void> {
+    // Keep every priority change atomic so a reload cannot observe a partially
+    // reordered Focus list.
+    await db.transaction('rw', db.notes, async () => {
+      const table = db.notes as any;
+      await Promise.all(updates.map(({ id, patch }) => table.update(id, patch)));
+    });
+  }
+
   async delete(id: string): Promise<void> {
     await db.notes.delete(id);
   }
