@@ -51,6 +51,12 @@ export class NotesService {
       isTitleCustom: true,
       content: original.content,
       tags: original.tags,
+      plan: original.plan
+        ? {
+            objective: original.plan.objective,
+            steps: original.plan.steps.map((step) => ({ ...step, id: uuid() })),
+          }
+        : undefined,
     });
   }
 

@@ -31,6 +31,15 @@ function NoteListItemImpl({
   focusPosition,
   focusTotal,
 }: Props) {
+  const planSteps = note.plan?.steps ?? [];
+  const completedSteps = planSteps.filter((step) => step.status === 'done').length;
+  const nextStep = planSteps.find((step) => step.status === 'todo')
+    ?? planSteps.find((step) => step.status === 'waiting');
+  const planSummary = planSteps.length > 0
+    ? nextStep
+      ? `${nextStep.status === 'waiting' ? 'Waiting' : 'Next'}: ${nextStep.text}`
+      : 'Plan complete'
+    : null;
   const {
     attributes,
     listeners,
@@ -68,9 +77,16 @@ function NoteListItemImpl({
           {note.isFavorite && <span className="note-list-item__badge">⭐</span>}
           {note.title || 'Untitled'}
         </span>
-        <span className="note-list-item__meta">
-          {new Date(note.updatedAt).toLocaleDateString()}
-        </span>
+        {focusPosition !== undefined && planSummary ? (
+          <span className="note-list-item__meta note-list-item__meta--plan">
+            <span className="note-list-item__plan-progress">{completedSteps}/{planSteps.length}</span>
+            <span className="note-list-item__next-step">{planSummary}</span>
+          </span>
+        ) : (
+          <span className="note-list-item__meta">
+            {new Date(note.updatedAt).toLocaleDateString()}
+          </span>
+        )}
       </button>
       <NoteActionsMenu
         note={note}

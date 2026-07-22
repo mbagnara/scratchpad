@@ -1,0 +1,300 @@
+.note-plan {
+  margin: 0 0 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--accent-bg) 34%, var(--bg-elevated));
+  overflow: hidden;
+}
+
+.note-plan__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 0;
+  background: transparent;
+  color: var(--text-h);
+  text-align: left;
+}
+
+.note-plan__header:hover {
+  background: color-mix(in srgb, var(--accent-bg) 62%, transparent);
+}
+
+.note-plan__heading,
+.note-plan__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.note-plan__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.note-plan__summary {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.note-plan__chevron {
+  font-size: 18px;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 160ms ease;
+}
+
+.note-plan--expanded .note-plan__chevron {
+  transform: rotate(-90deg);
+}
+
+.note-plan__body {
+  padding: 2px 13px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.note-plan__objective {
+  display: grid;
+  gap: 4px;
+  padding: 12px 2px 10px;
+}
+
+.note-plan__objective > span {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.note-plan__objective input,
+.note-plan__add input,
+.note-plan-step__text {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.note-plan__objective input {
+  width: 100%;
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note-plan__objective input::placeholder,
+.note-plan__add input::placeholder {
+  color: var(--text-muted);
+  font-weight: 450;
+}
+
+.note-plan__progress {
+  height: 3px;
+  margin: 0 2px 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.note-plan__progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 180ms ease;
+}
+
+.note-plan__steps {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note-plan-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 3px 5px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
+}
+
+.note-plan-step:hover {
+  border-color: var(--border);
+  background: var(--bg-elevated);
+}
+
+.note-plan-step--dragging {
+  z-index: 20;
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+  box-shadow: var(--shadow-sm);
+  opacity: 0.94;
+}
+
+.note-plan-step__check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 6px;
+  color: white;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.note-plan-step--done .note-plan-step__check {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.note-plan-step__text {
+  width: 100%;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.note-plan-step--done .note-plan-step__text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.note-plan-step--waiting .note-plan-step__text {
+  color: var(--text-muted);
+}
+
+.note-plan-step__actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.note-plan-step:hover .note-plan-step__actions,
+.note-plan-step:focus-within .note-plan-step__actions,
+.note-plan-step--waiting .note-plan-step__actions {
+  opacity: 1;
+}
+
+.note-plan-step__actions button {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.note-plan-step__actions button:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.note-plan-step__waiting--active {
+  color: var(--accent) !important;
+  background: var(--accent-bg) !important;
+}
+
+.note-plan-step__delete:hover {
+  color: var(--danger) !important;
+}
+
+.note-plan-step__drag {
+  cursor: grab;
+  touch-action: none;
+}
+
+.note-plan-step__drag:active {
+  cursor: grabbing;
+}
+
+.note-plan__add {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 4px 8px;
+  color: var(--accent);
+}
+
+.note-plan__add input {
+  width: 100%;
+  font-size: 12px;
+}
+
+.note-plan__complete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 1px 2px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  color: var(--text-muted);
+  background: var(--accent-bg);
+  font-size: 10px;
+}
+
+.note-plan__complete button,
+.note-plan__footer button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: inherit;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.note-plan__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 2px 0;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.note-plan__footer button {
+  color: var(--text-muted);
+}
+
+.note-plan__footer button:hover {
+  color: var(--danger);
+}
+
+@media (max-width: 600px) {
+  .note-plan-step__actions {
+    opacity: 1;
+  }
+
+  .note-plan__complete,
+  .note-plan__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

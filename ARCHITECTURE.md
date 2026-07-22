@@ -145,10 +145,20 @@ interface Note {
   isFavorite: boolean;
   isPinned: boolean;
   focusOrder?: number;     // one-based priority inside Focus
+  plan?: NotePlan | null;  // optional structured execution plan; null removes it
   isArchived: boolean;
   createdAt: number;       // epoch ms
   updatedAt: number;
   lastOpenedAt: number | null;
+}
+
+interface NotePlan {
+  objective: string;
+  steps: Array<{
+    id: string;
+    text: string;
+    status: 'todo' | 'waiting' | 'done';
+  }>;
 }
 
 interface Block {          // shape owned by the editor, persisted as-is
@@ -251,13 +261,15 @@ Autosave: `useAutosave` hook debounces editor `onChange` (≈400ms), calls `Note
 
 This isolates all ProseMirror/BlockNote-specific code inside `editor/`, so the rest of the app only ever sees the `Block[]` document shape — a future migration to a different editor engine would touch this folder only.
 
+The optional **Plan** is stored separately from `content`. This keeps the editor free-form while allowing Focus to derive reliable progress and next-action summaries. Plan steps remain deliberately flat: ordering, completion, and a lightweight waiting state are supported without introducing task hierarchies, dates, or dependencies.
+
 ---
 
 ## 9. Search Architecture
 
 **MiniSearch** — a lightweight, dependency-free full-text search library that runs entirely in-memory client-side, ideal for the expected scale (hundreds to low-thousands of local notes).
 
-- Index fields: `title` (boosted), `tags` (boosted), and a flattened plain-text extraction of `content` (block tree → string, computed on save).
+- Index fields: `title` (boosted), `tags` (boosted), a flattened plain-text extraction of `content`, and Plan objective/step text (computed on save).
 - Index built once on app load (from all notes in Dexie) and kept incrementally in sync: `NotesService.create/update/delete` calls `SearchService.index/remove` as a side effect.
 - Query-as-you-type: `useSearch` hook debounces ~150ms, calls `SearchService.query`, returns ranked results with highlighted snippets.
 - Because everything is in-memory, results are effectively instant; no server round-trip exists to introduce latency.
