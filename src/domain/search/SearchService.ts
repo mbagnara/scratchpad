@@ -30,11 +30,14 @@ export class SearchService {
   private indexed = new Set<string>();
 
   private toDoc(note: Note): SearchDoc {
+    const planText = note.plan
+      ? [note.plan.objective, ...note.plan.steps.map((step) => step.text)].join(' ')
+      : '';
     return {
       id: note.id,
       title: note.title,
       tags: note.tags.join(' '),
-      content: extractPlainText(note.content),
+      content: `${extractPlainText(note.content)} ${planText}`.trim(),
     };
   }
 

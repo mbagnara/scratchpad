@@ -1,10 +1,12 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import type { Block } from '@blocknote/core';
+import type { NotePlan } from '../domain/notes';
 import { useNotesStore } from '../state/notesStore';
 import { useEditorStore } from '../state/editorStore';
 import { useAutosave } from '../hooks/useAutosave';
 import { TagInput } from '../components/ui/TagInput';
 import { NoteAttachments, type NoteAttachmentsHandle } from '../components/attachments/NoteAttachments';
+import { NotePlanPanel } from '../components/plan/NotePlanPanel';
 import { TableOfContents } from '../components/toc/TableOfContents';
 import { BlockEditor } from './BlockEditor';
 import { deriveTitleFromContent } from './deriveTitle';
@@ -23,6 +25,7 @@ interface PendingPatch {
   isTitleCustom: boolean;
   content: Block[];
   tags: string[];
+  plan?: NotePlan | null;
 }
 
 export function EditorPane() {
@@ -32,6 +35,8 @@ export function EditorPane() {
   const togglePin = useNotesStore((s) => s.togglePin);
   const toggleFavorite = useNotesStore((s) => s.toggleFavorite);
   const saveStatus = useEditorStore((s) => s.saveStatus);
+  const [planExpanded, setPlanExpanded] = useState(true);
+  const [hiddenPlanNoteId, setHiddenPlanNoteId] = useState<string | null>(null);
 
   const pendingPatch = useRef<PendingPatch | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +58,11 @@ export function EditorPane() {
     };
   }, [note?.id]);
 
+  useEffect(() => {
+    setPlanExpanded(true);
+    setHiddenPlanNoteId(null);
+  }, [note?.id]);
+
   const scheduleSave = useAutosave(async () => {
     if (!note || !pendingPatch.current) return;
     await updateNote(note.id, pendingPatch.current);
@@ -66,12 +76,13 @@ export function EditorPane() {
     );
   }
 
-  const getCurrent = (): PendingPatch => ({
-    title: pendingPatch.current?.title ?? note.title,
-    isTitleCustom: pendingPatch.current?.isTitleCustom ?? note.isTitleCustom,
-    content: pendingPatch.current?.content ?? note.content,
-    tags: pendingPatch.current?.tags ?? note.tags,
-  });
+  const getCurrent = (): PendingPatch => pendingPatch.current ?? {
+    title: note.title,
+    isTitleCustom: note.isTitleCustom,
+    content: note.content,
+    tags: note.tags,
+    plan: note.plan,
+  };
 
   const commitPatch = (patch: PendingPatch) => {
     pendingPatch.current = patch;
@@ -103,6 +114,22 @@ export function EditorPane() {
   const handleRemoveTag = (tag: string) => {
     const current = getCurrent();
     commitPatch({ ...current, tags: current.tags.filter((t) => t !== tag) });
+  };
+
+  const createPlan = () => {
+    const current = getCurrent();
+    setHiddenPlanNoteId(null);
+    if (!current.plan) commitPatch({ ...current, plan: { objective: '', steps: [] } });
+    setPlanExpanded(true);
+  };
+
+  const removePlan = () => {
+    setHiddenPlanNoteId(note.id);
+    const patch = { ...getCurrent(), plan: null };
+    commitPatch(patch);
+    // Persist an explicit tombstone immediately. Unlike an optional undefined
+    // property, null survives every object merge and IndexedDB write path.
+    void updateNote(note.id, { plan: null });
   };
 
   const current = getCurrent();
@@ -140,6 +167,17 @@ export function EditorPane() {
             <span aria-hidden="true">◎</span>
           </button>
           <button
+            className={`editor-pane__icon-button ${current.plan ? 'editor-pane__icon-button--active' : ''}`}
+            aria-label={current.plan ? 'Open plan' : 'Add plan'}
+            title={current.plan ? 'Open plan' : 'Add a lightweight plan'}
+            onClick={createPlan}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.7" />
+              <path d="m8 12 2 2 5-5M8 17h7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
             className="editor-pane__icon-button"
             aria-label="Attach files"
             title="Attach files (25 MB max)"
@@ -155,6 +193,18 @@ export function EditorPane() {
         </div>
       </div>
       <TagInput tags={current.tags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+      {current.plan && hiddenPlanNoteId !== note.id && (
+        <NotePlanPanel
+          key={`plan-${note.id}`}
+          plan={current.plan}
+          expanded={planExpanded}
+          isFocused={note.isPinned}
+          onExpandedChange={setPlanExpanded}
+          onChange={(plan) => commitPatch({ ...getCurrent(), plan })}
+          onRemove={removePlan}
+          onRemoveFromFocus={() => togglePin(note.id)}
+        />
+      )}
       <NoteAttachments ref={noteAttachmentsRef} noteId={note.id} />
       <BlockEditor
         key={note.id}

@@ -1,5 +1,18 @@
 import type { Block } from '@blocknote/core';
 
+export type PlanStepStatus = 'todo' | 'waiting' | 'done';
+
+export interface PlanStep {
+  id: string;
+  text: string;
+  status: PlanStepStatus;
+}
+
+export interface NotePlan {
+  objective: string;
+  steps: PlanStep[];
+}
+
 export interface Note {
   id: string;
   title: string;
@@ -12,6 +25,8 @@ export interface Note {
   isPinned: boolean;
   /** One-based priority inside Focus. Lower numbers are more important. */
   focusOrder?: number;
+  /** Optional, lightweight execution plan kept separate from the free-form document. */
+  plan?: NotePlan | null;
   isArchived: boolean;
   createdAt: number;
   updatedAt: number;
@@ -24,4 +39,4 @@ export interface NoteFilter {
   tag?: string;
 }
 
-export type NoteInput = Partial<Pick<Note, 'title' | 'content' | 'tags' | 'isTitleCustom'>>;
+export type NoteInput = Partial<Pick<Note, 'title' | 'content' | 'tags' | 'isTitleCustom' | 'plan'>>;

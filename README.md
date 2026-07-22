@@ -7,8 +7,9 @@ A fast, distraction-free note-taking app with a block-based editor, instant sear
 - Block-based editor: paragraphs, headings, bullet/numbered lists, checklists, quotes, dividers, toggles, callouts, code blocks with syntax highlighting, images, and inline file attachments
 - Note-level attachments with a collapsible file panel, preview, download, rename, and removal
 - Slash command menu (`/`) and markdown shortcuts (`#`, `-`, `>`, ` ``` `, ...)
-- Instant full-text search across titles, tags, and content (`Cmd/Ctrl+K`)
+- Instant full-text search across titles, tags, content, and Plan steps (`Cmd/Ctrl+K`)
 - Tags, favorites, priority-ordered Focus working set, and archive
+- Optional per-note Plan with an outcome, reorderable steps, waiting state, progress, and next-action summary in Focus
 - Auto-generated title from note content (editable anytime)
 - Table of contents with scroll-to-section navigation
 - Autosave with live status (Saving… / Saved / Offline)
