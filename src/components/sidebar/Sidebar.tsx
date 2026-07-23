@@ -22,6 +22,7 @@ import { NoteListItem } from './NoteListItem';
 
 export function Sidebar() {
   const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [notesExpanded, setNotesExpanded] = useState(true);
   const notes = useNotesStore((s) => s.notes);
   const activeNoteId = useNotesStore((s) => s.activeNoteId);
   const activeFilter = useNotesStore((s) => s.activeFilter);
@@ -169,48 +170,62 @@ export function Sidebar() {
           </section>
         )}
 
-        <div className="sidebar__notes-heading">
-          <span>Notes</span>
-          {activeFilter.type === 'tag' && <span>#{activeFilter.tag}</span>}
-          <span className="sidebar__notes-count">{visibleNotes.length}</span>
-        </div>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={visibleNotes.map((note) => note.id)}
-            strategy={verticalListSortingStrategy}
+        <section className={`sidebar__notes ${notesExpanded ? 'sidebar__notes--expanded' : ''}`}>
+          <button
+            className="sidebar__notes-heading"
+            type="button"
+            aria-expanded={notesExpanded}
+            aria-controls="sidebar-notes-list"
+            onClick={() => setNotesExpanded((expanded) => !expanded)}
           >
-            <ul className={`note-list ${focusActive ? 'note-list--focus' : ''}`}>
-              {visibleNotes.map((note, index) => (
-                <NoteListItem
-                  key={note.id}
-                  note={note}
-                  active={note.id === activeNoteId}
-                  onSelect={selectAndClose}
-                  onDelete={deleteNote}
-                  onDuplicate={duplicateNote}
-                  onTogglePin={togglePin}
-                  onToggleFavorite={toggleFavorite}
-                  onArchive={archiveNote}
-                  onRestore={restoreNote}
-                  focusPosition={focusActive ? index + 1 : undefined}
-                  focusTotal={focusActive ? visibleNotes.length : undefined}
-                />
-              ))}
-              {visibleNotes.length === 0 && (
-                <li className="note-list__empty">
-                  {focusActive
-                    ? 'Your focus is clear. Add a note when you start working on it.'
-                    : 'No notes here'}
-                </li>
-              )}
-            </ul>
-          </SortableContext>
-        </DndContext>
+            <span>Notes</span>
+            {activeFilter.type === 'tag' && <span>#{activeFilter.tag}</span>}
+            <span className="sidebar__notes-meta">
+              <span className="sidebar__notes-count">{visibleNotes.length}</span>
+              <span className="sidebar__notes-chevron" aria-hidden="true">›</span>
+            </span>
+          </button>
+
+          {notesExpanded && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={visibleNotes.map((note) => note.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <ul id="sidebar-notes-list" className={`note-list ${focusActive ? 'note-list--focus' : ''}`}>
+                  {visibleNotes.map((note, index) => (
+                    <NoteListItem
+                      key={note.id}
+                      note={note}
+                      active={note.id === activeNoteId}
+                      onSelect={selectAndClose}
+                      onDelete={deleteNote}
+                      onDuplicate={duplicateNote}
+                      onTogglePin={togglePin}
+                      onToggleFavorite={toggleFavorite}
+                      onArchive={archiveNote}
+                      onRestore={restoreNote}
+                      focusPosition={focusActive ? index + 1 : undefined}
+                      focusTotal={focusActive ? visibleNotes.length : undefined}
+                    />
+                  ))}
+                  {visibleNotes.length === 0 && (
+                    <li className="note-list__empty">
+                      {focusActive
+                        ? 'Your focus is clear. Add a note when you start working on it.'
+                        : 'No notes here'}
+                    </li>
+                  )}
+                </ul>
+              </SortableContext>
+            </DndContext>
+          )}
+        </section>
 
         <div className="sidebar__footer">
           <div className="sidebar__storage">
