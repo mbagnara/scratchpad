@@ -44,7 +44,9 @@ export function Sidebar() {
   const visibleNotes = filterNotesForSidebar(notes, activeFilter);
   const tags = getAvailableTags(notes);
   const focusCount = notes.filter((note) => !note.isArchived && note.isPinned).length;
+  const recentCount = filterNotesForSidebar(notes, { type: 'recent' }).length;
   const favoritesCount = notes.filter((note) => !note.isArchived && note.isFavorite).length;
+  const archiveCount = filterNotesForSidebar(notes, { type: 'archive' }).length;
   const focusActive = activeFilter.type === 'focus';
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -106,6 +108,7 @@ export function Sidebar() {
           <NavItem
             label="Recent"
             icon="🕐"
+            count={recentCount}
             active={activeFilter.type === 'recent'}
             onClick={() => setFilter({ type: 'recent' })}
           />
@@ -119,6 +122,7 @@ export function Sidebar() {
           <NavItem
             label="Archive"
             icon="🗄"
+            count={archiveCount}
             active={activeFilter.type === 'archive'}
             onClick={() => setFilter({ type: 'archive' })}
           />
