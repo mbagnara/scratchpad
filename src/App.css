@@ -257,6 +257,144 @@
   color: var(--danger);
 }
 
+.note-actions-menu--confirming .note-actions-menu__trigger {
+  visibility: visible;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.note-delete-popover {
+  position: fixed;
+  z-index: 120;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 10px;
+  width: 292px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--danger) 18%, var(--border));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--bg-elevated) 94%, var(--bg));
+  box-shadow: 0 18px 48px rgba(29, 20, 51, 0.18), 0 3px 12px rgba(29, 20, 51, 0.08);
+  backdrop-filter: blur(18px);
+  animation: note-delete-popover-in 150ms ease-out;
+}
+
+.note-delete-popover__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+}
+
+.note-delete-popover__content {
+  min-width: 0;
+}
+
+.note-delete-popover__content strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 720;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-delete-popover__content p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.note-delete-popover__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.note-delete-popover__actions button {
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--bg-elevated);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.note-delete-popover__actions button:hover {
+  border-color: var(--border-strong);
+  background: var(--accent-bg);
+}
+
+.note-delete-popover__actions .note-delete-popover__confirm {
+  border-color: color-mix(in srgb, var(--danger) 38%, transparent);
+  color: white;
+  background: var(--danger);
+}
+
+.note-delete-popover__actions .note-delete-popover__confirm:hover {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 86%, black);
+}
+
+@keyframes note-delete-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .note-delete-popover {
+    top: auto !important;
+    right: 12px;
+    bottom: 12px;
+    left: 12px !important;
+    width: auto;
+    padding: 16px;
+    border-radius: 16px;
+    animation-name: note-delete-sheet-in;
+  }
+
+  .note-delete-popover__content strong {
+    font-size: 13px;
+  }
+
+  .note-delete-popover__content p {
+    font-size: 11px;
+  }
+}
+
+@keyframes note-delete-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-delete-popover {
+    animation: none;
+  }
+}
+
 /* Editor */
 
 .editor-shell {
